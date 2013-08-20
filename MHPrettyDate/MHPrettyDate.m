@@ -35,6 +35,8 @@
 @property (readonly, nonatomic) NSCalendar*        calendar;
 @property (strong, nonatomic)   NSDateFormatter*   dateFormatter;
 @property (assign)              MHPrettyDateFormat dateFormat;
+@property (assign, nonatomic)   BOOL               shouldShowSeconds;
+@property (assign, nonatomic)   BOOL               shouldShowNow;
 
 +(MHPrettyDate*) sharedInstance;
 -(NSDate* )      normalizeDate:(NSDate*) date;
@@ -66,6 +68,15 @@
     });
     return _singleton;
 }
+
+- (instancetype)init
+{
+   if ((self = [super init])) {
+      _shouldShowNow = YES;
+   }
+   return self;
+}
+
 
 #pragma mark - worker methods
 
@@ -102,6 +113,11 @@
 -(NSInteger) minutesFromNow:(NSDate*) compareDate
 {
    return ([compareDate timeIntervalSinceNow] / 60);
+}
+
+-(NSInteger) secondsFromNow:(NSDate*) compareDate
+{
+   return ([compareDate timeIntervalSinceNow]);
 }
 
 -(NSInteger) hoursFromNow:(NSDate*) compareDate
@@ -166,7 +182,24 @@
    else if ([MHPrettyDate isWithin24Hours:date])
    {
       MHPrettyDate *prettyDate = [MHPrettyDate sharedInstance];
-      if ([MHPrettyDate isWithinHour: date])
+
+      
+      if ([MHPrettyDate sharedInstance].shouldShowSeconds && [MHPrettyDate isWithinMinute: date]) {
+         NSInteger seconds = [prettyDate secondsFromNow: date] * -1;
+         NSString *post;
+         
+         if ([MHPrettyDate sharedInstance].shouldShowNow && seconds == 0)
+         {
+            dateString = NSLocalizedStringFromTable(@"Now", @"MHPrettyDate", nil);
+         }
+         else
+         {
+            if (seconds == 1) post = (dateFormat == MHPrettyDateLongRelativeTime) ? NSLocalizedStringFromTable(@" second ago", @"MHPrettyDate", nil) : NSLocalizedStringFromTable(@"s", @"MHPrettyDate", nil);
+            else post = (dateFormat == MHPrettyDateLongRelativeTime) ? NSLocalizedStringFromTable(@" seconds ago", @"MHPrettyDate", nil) : NSLocalizedStringFromTable(@"s", @"MHPrettyDate", nil);
+            dateString = [NSString stringWithFormat: @"%d%@", seconds, post];
+         }
+      }
+      else if ([MHPrettyDate sharedInstance].shouldShowNow && [MHPrettyDate isWithinHour: date])
       {
          // if within 60 minutes print minutes
          NSInteger minutes = [prettyDate minutesFromNow: date] * -1;
@@ -381,6 +414,17 @@
    return ([MHPrettyDate isTomorrow:date] || [MHPrettyDate isWithinWeek:date]);
 }
 
++ (BOOL)setShouldShowSeconds:(BOOL)shouldShowSeconds
+{
+   [MHPrettyDate sharedInstance].shouldShowSeconds = shouldShowSeconds;
+}
+
++ (BOOL)setShouldShowNow:(BOOL)shouldShowNow
+{
+   [MHPrettyDate sharedInstance].shouldShowNow = shouldShowNow;
+}
+
+
 #pragma mark - date relative
 +(BOOL) isToday:(NSDate*) date
 {
@@ -469,6 +513,12 @@
 {
    MHPrettyDate* prettyDate   = [MHPrettyDate sharedInstance];
    return ([prettyDate hoursFromNow:date] == 0);
+}
+
++(BOOL) isWithinMinute:(NSDate*) date
+{
+   MHPrettyDate* prettyDate   = [MHPrettyDate sharedInstance];
+   return ([prettyDate minutesFromNow:date] == 0);
 }
 
 

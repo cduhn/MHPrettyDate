@@ -92,6 +92,8 @@ typedef enum
 +(NSString*) prettyDateFromDate:(NSDate*) date withFormat:(MHPrettyDateFormat) dateFormat;
 +(NSString*) prettyDateFromDate:(NSDate*) date withFormat:(MHPrettyDateFormat) dateFormat withDateStyle:(NSDateFormatterStyle) dateStyle;
 +(NSString*) prettyDateFromDate:(NSDate*) date withFormat:(MHPrettyDateFormat) dateFormat withDateStyle:(NSDateFormatterStyle) dateStyle withTimeStyle:(NSDateFormatterStyle) timeStyle;
++(BOOL)      setShouldShowSeconds:(BOOL) shouldShowSeconds;
++(BOOL)      setShouldShowNow:(BOOL) shouldShowNow;
 +(BOOL)      isToday:(NSDate*)       date;
 // date
 +(BOOL)      isPastDate:(NSDate*)     date;
@@ -106,5 +108,6 @@ typedef enum
 +(BOOL)      isPastTime:(NSDate*)     date;
 +(BOOL)      isWithin24Hours:(NSDate*)date;
 +(BOOL)      isWithinHour:(NSDate*)   date;
++(BOOL)      isWithinMinute:(NSDate*) date;
 
 @end
